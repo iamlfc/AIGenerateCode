@@ -12,7 +12,7 @@ import java.util.Random;
 
 //使用方法：选中这个文件，右键编译，编译好后通过project方式打开就可以找到生成的代码，不是通过android目录结构
 public class RubbishCode {
-    static String packageBase = "com.iajwenjfgjarkkakwlkwqjal.mathmate";  //生成java类根包名
+    static String packageBase = "com.ohyes.good";  //生成java类根包名
 
     static int packageCount = 30; //生成包数量 30
     static int activityCountPerPackage = 30;  //每个包下生成Activity类数量  30
@@ -52,11 +52,13 @@ public class RubbishCode {
 
     static void generateClasses() throws IOException {
         for (int i = 0; i < packageCount; i++) {
-            String packageName = rootpath + "/" + generateName();
+            String subpackageName =  generateName();
+
+            String packageName = rootpath + "/" + subpackageName;
             //生成Activity
             for (int j = 0; j < activityCountPerPackage; j++) {
                 String activityPreName = generateName();
-                generateActivity(packageName, activityPreName);
+                generateActivity(packageName, activityPreName,subpackageName);
             }
         }
         //所有Activity生成完了
@@ -65,9 +67,9 @@ public class RubbishCode {
 
 
     //普通类
-    static List<String> generateClass(String packageName, String className) throws IOException {
+    static List<String> generateClass(String packageName, String className, String subpackageName) throws IOException {
         List<String> fields = new ArrayList<>();
-        String content = "package  " + packageBase + ";\n" + "\n" + "import java.lang.Exception;\n" + "import java" +
+        String content = "package  " + packageBase + "."+subpackageName + ";\n" + "\n" + "import java.lang.Exception;\n" + "import java" +
                 ".lang.RuntimeException;\n" + "import java.lang.String;\n" + "import java.lang.System;\n" + "import " +
                 "java.util.Date;\n" + "\n" + "public class " + className + "  {\n";
 
@@ -86,7 +88,7 @@ public class RubbishCode {
         return fields;
     }
 
-    static void generateActivity(String packageName, String activityPreName) throws IOException {
+    static void generateActivity(String packageName, String activityPreName, String subpackageName) throws IOException {
         String className = String.valueOf(abc[random.nextInt(abc.length)]).toUpperCase() + activityPreName + "Activity";
         String layoutName = "layout_" + activityPreName;
         List<String> textIds = generateLayout(layoutName);  //生成layout
@@ -95,9 +97,10 @@ public class RubbishCode {
         stringList.add(stringsxml);
 
         String otherclassName = String.valueOf(abc[random.nextInt(abc.length)]).toUpperCase() + generateName();
-        List<String> fieldlist = generateClass(packageName, otherclassName);
+        List<String> fieldlist = generateClass(packageName, otherclassName,subpackageName);
         String widget = views[random.nextInt(views.length)];
-        String content = "package  " + packageBase + "." + activityPreName + ";\n" + "\n" + "import android.app" +
+        String content = "package  " + packageBase + "." + subpackageName + ";\n"
+                + "\n" + "import android.app" +
                 ".Activity;\n" + "import android.os.Bundle;\n" + "import " + packageBase + ".R;\n" + "import java" +
                 ".lang.Exception;\n" + "import java.lang.Override;\n" + "import java.lang.RuntimeException;\n" +
                 "import java.lang.String;\n";
