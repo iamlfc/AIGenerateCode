@@ -12,7 +12,7 @@ import java.util.Random;
 
 //使用方法：选中这个文件，右键编译，编译好后通过project方式打开就可以找到生成的代码，不是通过android目录结构
 public class RubbishCode {
-    static String packageBase = "com.ohyes.good";  //生成java类根包名
+    static String packageBase = "com.kefawogjergjskafkakfeaf.minefortune";  //生成java类根包名
 
     static int packageCount = 30; //生成包数量 30
     static int activityCountPerPackage = 30;  //每个包下生成Activity类数量  30
@@ -21,6 +21,28 @@ public class RubbishCode {
             "CheckBox", "RadioButton", "ToggleButton", "Spinner", "ListView", "GridView", "ScrollView", "DatePicker",
             "TimePicker", "RatingBar", "Switch", "TableLayout", "FrameLayout", "LinearLayout", "RelativeLayout",
             "ViewFlipper"};
+    static String[] animations = new String[]{"alpha", "scale", "translate", "rotate"};
+    static String[] dbOperations = new String[]{
+        "CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, value TEXT)",
+        "INSERT INTO %s (name, value) VALUES (?, ?)",
+        "SELECT * FROM %s WHERE name = ?",
+        "UPDATE %s SET value = ? WHERE name = ?",
+        "DELETE FROM %s WHERE name = ?"
+    };
+    static String[] fileOperations = new String[]{
+        "writeFile",
+        "readFile",
+        "deleteFile",
+        "copyFile",
+        "moveFile"
+    };
+    static String[] threadOperations = new String[]{
+        "runOnUiThread",
+        "executeAsync",
+        "postDelayed",
+        "startThread",
+        "scheduleTask"
+    };
     static Random random = new Random();
     static String rootpath;
     static char[] abc = "abcdefghijklmnopqrstuvwxyz".toCharArray();
@@ -100,20 +122,212 @@ public class RubbishCode {
         List<String> fieldlist = generateClass(packageName, otherclassName,subpackageName);
         String widget = views[random.nextInt(views.length)];
         String content = "package  " + packageBase + "." + subpackageName + ";\n"
-                + "\n" + "import android.app" +
-                ".Activity;\n" + "import android.os.Bundle;\n" + "import " + packageBase + ".R;\n" + "import java" +
-                ".lang.Exception;\n" + "import java.lang.Override;\n" + "import java.lang.RuntimeException;\n" +
-                "import java.lang.String;\n";
+                + "\n" + "import android.app.Activity;\n" 
+                + "import android.os.Bundle;\n" 
+                + "import android.os.Handler;\n"
+                + "import android.os.Looper;\n"
+                + "import android.os.SystemClock;\n"
+                + "import android.content.Intent;\n"
+                + "import android.database.sqlite.SQLiteDatabase;\n"
+                + "import android.database.sqlite.SQLiteOpenHelper;\n"
+                + "import android.view.animation.Animation;\n"
+                + "import android.view.animation.AnimationUtils;\n"
+                + "import " + packageBase + ".R;\n" 
+                + "import java.lang.Exception;\n" 
+                + "import java.lang.Override;\n" 
+                + "import java.lang.RuntimeException;\n"
+                + "import java.lang.String;\n"
+                + "import java.io.*;\n"
+                + "import java.util.concurrent.Executors;\n"
+                + "import java.util.concurrent.ScheduledExecutorService;\n"
+                + "import java.util.concurrent.TimeUnit;\n";
         content = content + "import android.widget." + widget + ";\n";
-        content = content + "import android.view.View;\n" + "import android.widget.TextView;;\n" + "import java.lang" +
-                ".System;\n" + "import android.widget.Toast;\n" + "import java.util.Date;\n" + "\n" + "public class " + className + " extends Activity {\n" + "    @Override\n" + "    protected void onCreate(Bundle savedInstanceState) {\n" + "        super.onCreate(savedInstanceState);\n" + "        setContentView(R.layout." + layoutName + ");\n";
+        content = content + "import android.view.View;\n" 
+                + "import android.widget.TextView;\n" 
+                + "import java.lang.System;\n" 
+                + "import android.widget.Toast;\n" 
+                + "import java.util.Date;\n\n" 
+                + "public class " + className + " extends Activity {\n"
+                + "    @Override\n" 
+                + "    protected void onCreate(Bundle savedInstanceState) {\n" 
+                + "        super.onCreate(savedInstanceState);\n" 
+                + "        setContentView(R.layout." + layoutName + ");\n";
 
+        // 为每个控件添加点击事件
         for (int i = 0; i < textIds.size(); i++) {
             String name = generateName();
-            content = content + "     View  " + name + " = findViewById(R.id." + textIds.get(i) + ");\n" + "         "
-                    + name + ".setOnClickListener(new View.OnClickListener() {\n" + "            @Override\n" + "    " +
-                    "        public void onClick(View v) {\n" + name + ".setVisibility(View.INVISIBLE);\n" + "       " +
-                    "     }\n" + "        });\n";
+            String nextActivityName = String.valueOf(abc[random.nextInt(abc.length)]).toUpperCase() + generateName() + "Activity";
+            
+            content = content + "     final View " + name + " = findViewById(R.id." + textIds.get(i) + ");\n"
+                    + "     " + name + ".setOnClickListener(new View.OnClickListener() {\n"
+                    + "         @Override\n"
+                    + "         public void onClick(View v) {\n";
+
+            // 随机生成2-10个操作
+            int operationCount = random.nextInt(9) + 2;
+            int lastOperationType = -1; // 记录上一个操作的类型
+            for(int j = 0; j < operationCount; j++) {
+                int operationType;
+                do {
+                    operationType = random.nextInt(6);
+                } while (operationType == lastOperationType); // 确保不会连续生成相同类型的操作
+                lastOperationType = operationType;
+                
+                switch(operationType) {
+                    case 0: // 数据库操作
+                        String dbHelperName = generateName();
+                        String tableName = generateName();
+                        String dbName = generateName();
+                        content += "             SQLiteOpenHelper " + dbHelperName + " = new SQLiteOpenHelper(" + className + ".this, \"" + generateName() + ".db\", null, 1) {\n"
+                                + "                 @Override\n"
+                                + "                 public void onCreate(SQLiteDatabase db) {\n"
+                                + "                     db.execSQL(String.format(\"" + dbOperations[0] + "\", \"" + tableName + "\"));\n"
+                                + "                 }\n"
+                                + "                 @Override\n"
+                                + "                 public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}\n"
+                                + "             };\n"
+                                + "             SQLiteDatabase " + dbName + " = " + dbHelperName + ".getWritableDatabase();\n"
+                                + "             try {\n"
+                                + "                 " + dbName + ".execSQL(\"" + dbOperations[random.nextInt(dbOperations.length - 1) + 1].replace("%s", tableName) 
+                                + "\", new String[]{\"" + generateName() + "\", \"" + generateName() + "\"});\n"
+                                + "             } finally {\n"
+                                + "                 " + dbName + ".close();\n"
+                                + "                 " + dbHelperName + ".close();\n"
+                                + "             }\n";
+                        break;
+                    case 1: // 文件操作
+                        String fileName = generateName();
+                        String operation = fileOperations[random.nextInt(fileOperations.length)];
+                        content += "             File file" + j + " = new File(getFilesDir(), \"" + fileName + ".txt\");\n";
+                        if(operation.equals("writeFile")) {
+                            String writerName = generateName();
+                            content += "             FileWriter " + writerName + " = null;\n"
+                                    + "             try {\n"
+                                    + "                 " + writerName + " = new FileWriter(file" + j + ");\n"
+                                    + "                 " + writerName + ".write(\"" + generateBigValue() + "\");\n"
+                                    + "             } catch (IOException e) {\n"
+                                    + "                 e.printStackTrace();\n"
+                                    + "             } finally {\n"
+                                    + "                 if (" + writerName + " != null) {\n"
+                                    + "                     try {\n"
+                                    + "                         " + writerName + ".close();\n"
+                                    + "                     } catch (IOException e) {\n"
+                                    + "                         e.printStackTrace();\n"
+                                    + "                     }\n"
+                                    + "                 }\n"
+                                    + "             }\n";
+                        } else if(operation.equals("readFile")) {
+                            String readerName = generateName();
+                            content += "             FileReader " + readerName + " = null;\n"
+                                    + "             try {\n"
+                                    + "                 if(file" + j + ".exists()) {\n"
+                                    + "                     " + readerName + " = new FileReader(file" + j + ");\n"
+                                    + "                     // 读取操作\n"
+                                    + "                 }\n"
+                                    + "             } catch (IOException e) {\n"
+                                    + "                 e.printStackTrace();\n"
+                                    + "             } finally {\n"
+                                    + "                 if (" + readerName + " != null) {\n"
+                                    + "                     try {\n"
+                                    + "                         " + readerName + ".close();\n"
+                                    + "                     } catch (IOException e) {\n"
+                                    + "                         e.printStackTrace();\n"
+                                    + "                     }\n"
+                                    + "                 }\n"
+                                    + "             }\n";
+                        } else if(operation.equals("deleteFile")) {
+                            content += "             if(file" + j + ".exists()) file" + j + ".delete();\n";
+                        }
+                        break;
+                    case 2: // 线程操作
+                        String threadOp = threadOperations[random.nextInt(threadOperations.length)];
+                        if(threadOp.equals("runOnUiThread")) {
+                            content += "             runOnUiThread(new Runnable() {\n"
+                                    + "                 @Override\n"
+                                    + "                 public void run() {\n"
+                                    + "                     Toast.makeText(" + className + ".this, \"" + generateName() + "\", Toast.LENGTH_SHORT).show();\n"
+                                    + "                 }\n"
+                                    + "             });\n";
+                        } else if(threadOp.equals("postDelayed")) {
+                            String handlerName = generateName();
+                            content += "             Handler " + handlerName + " = new Handler(Looper.getMainLooper());\n"
+                                    + "             " + handlerName + ".postDelayed(new Runnable() {\n"
+                                    + "                 @Override\n"
+                                    + "                 public void run() {\n"
+                                    + "                     " + name + ".setVisibility(View.VISIBLE);\n"
+                                    + "                 }\n"
+                                    + "             }, " + random.nextInt(1000) + ");\n";
+                        } else {
+                            String executorName = generateName();
+                            content += "             ScheduledExecutorService " + executorName + " = Executors.newScheduledThreadPool(" + (random.nextInt(4) + 1) + ");\n"
+                                    + "             " + executorName + ".execute(new Runnable() {\n"
+                                    + "                 @Override\n"
+                                    + "                 public void run() {\n"
+                                    + "                     SystemClock.sleep(" + random.nextInt(100) + ");\n"
+                                    + "                 }\n"
+                                    + "             });\n"
+                                    + "             " + executorName + ".shutdown();\n";
+                        }
+                        break;
+                    case 3: // 工具类操作
+                        int utilType = random.nextInt(3);
+                        if(utilType == 0) { // 日期处理
+                            String dateName = generateName();
+                            String timeName = generateName();
+                            content += "             Date " + dateName + " = new Date();\n"
+                                    + "             String " + timeName + " = String.valueOf(" + dateName + ".getTime());\n"
+                                    + "             System.currentTimeMillis();\n";
+                        } else if(utilType == 1) { // 字符串处理
+                            String strName = generateName();
+                            content += "             String " + strName + " = \"" + generateBigValue() + "\";\n"
+                                    + "             " + strName + ".substring(" + random.nextInt(5) + ");\n"
+                                    + "             " + strName + ".replace('" + abc[random.nextInt(abc.length)] + "', '" + abc[random.nextInt(abc.length)] + "');\n";
+                        } else { // 数字处理
+                            String numName = generateName();
+                            content += "             int " + numName + " = " + random.nextInt(1000) + ";\n"
+                                    + "             Math.max(" + numName + ", " + random.nextInt(1000) + ");\n"
+                                    + "             String.valueOf(" + numName + ");\n";
+                        }
+                        break;
+                    case 4: // Activity跳转
+                        String intentName = generateName();
+                        content += "             Intent " + intentName + " = new Intent();\n"
+                                + "             " + intentName + ".setClassName(getPackageName(), \"" + packageBase + "." 
+                                + subpackageName + "." + nextActivityName + "\");\n"
+                                + "             startActivity(" + intentName + ");\n";
+                        break;
+                    case 5: // 动画效果
+                        int animType = random.nextInt(4);
+                        if(animType == 0) { // 透明度动画
+                            content += "             " + name + ".animate()\n"
+                                    + "                     .alpha(" + (random.nextFloat()) + "f)\n"
+                                    + "                     .setDuration(" + random.nextInt(1000) + ")\n"
+                                    + "                     .start();\n";
+                        } else if(animType == 1) { // 缩放动画
+                            float scale = random.nextFloat() * 2;
+                            content += "             " + name + ".animate()\n"
+                                    + "                     .scaleX(" + scale + "f)\n"
+                                    + "                     .scaleY(" + scale + "f)\n"
+                                    + "                     .setDuration(" + random.nextInt(1000) + ")\n"
+                                    + "                     .start();\n";
+                        } else if(animType == 2) { // 位移动画
+                            content += "             " + name + ".animate()\n"
+                                    + "                     .translationX(" + random.nextInt(200) + "f)\n"
+                                    + "                     .translationY(" + random.nextInt(200) + "f)\n"
+                                    + "                     .setDuration(" + random.nextInt(1000) + ")\n"
+                                    + "                     .start();\n";
+                        } else { // 旋转动画
+                            content += "             " + name + ".animate()\n"
+                                    + "                     .rotation(" + random.nextInt(360) + "f)\n"
+                                    + "                     .setDuration(" + random.nextInt(1000) + ")\n"
+                                    + "                     .start();\n";
+                        }
+                        break;
+                }
+            }
+            
+            content += "         }\n"
+                    + "     });\n";
         }
 
         String otherclassNamefeild = generateName();
@@ -128,21 +342,60 @@ public class RubbishCode {
                 ".LENGTH_SHORT).show();\n" + "    }";
 
         //其它方法
-        int bwe = random.nextInt(20) + 3;
-        for (int j = 0; j < bwe; j++) {//生成方法
+        int methodCount = random.nextInt(5) + 1; // 生成1-5个方法
+        List<String> methodNames = new ArrayList<>();
+        methodNames.add(methodName);
+        
+        for (int j = 0; j < methodCount; j++) {
             String methodNamenext = generateName();
-
-            if (j != bwe - 1) {
-                content = content + "\n" + " void " + methodName + "() {" + "\n         " + methodNamenext + "();\n"
-                        //调用下一个方法
-                        + "}"; //方法末尾
-            } else {
-                String name = generateName();
-                content =
-                        content + "\n" + " void " + methodName + "() {\n" + widget + " " + name + "   = new " + widget + "(" + className + ".this);\n" + name + ".setVisibility(View.VISIBLE);\n" + "}"; //方法末尾
+            methodNames.add(methodNamenext);
+            String name = generateName();
+            
+            // 随机选择一个操作类型
+            int operationType = random.nextInt(4);
+            switch(operationType) {
+                case 0: // 字符串操作
+                    content = content + "\n" + " void " + methodName + "() {\n"
+                            + "     String " + name + " = \"" + generateBigValue() + "\";\n"
+                            + "     " + name + " = " + name + ".substring(" + random.nextInt(5) + ");\n"
+                            + "     " + name + " = " + name + ".toUpperCase();\n";
+                    if (j < methodCount - 1) {
+                        content += "     " + methodNamenext + "();\n";
+                    }
+                    content += "}";
+                    break;
+                case 1: // 数学运算
+                    content = content + "\n" + " void " + methodName + "() {\n"
+                            + "     int " + name + " = " + random.nextInt(1000) + ";\n"
+                            + "     double result = Math.sqrt(" + name + ");\n"
+                            + "     result = Math.pow(result, 2);\n";
+                    if (j < methodCount - 1) {
+                        content += "     " + methodNamenext + "();\n";
+                    }
+                    content += "}";
+                    break;
+                case 2: // UI操作
+                    content = content + "\n" + " void " + methodName + "() {\n"
+                            + "     " + widget + " " + name + " = new " + widget + "(" + className + ".this);\n"
+                            + "     " + name + ".setVisibility(View.VISIBLE);\n"
+                            + "     " + name + ".setEnabled(" + (random.nextBoolean() ? "true" : "false") + ");\n";
+                    if (j < methodCount - 1) {
+                        content += "     " + methodNamenext + "();\n";
+                    }
+                    content += "}";
+                    break;
+                case 3: // 时间操作
+                    content = content + "\n" + " void " + methodName + "() {\n"
+                            + "     long " + name + " = System.currentTimeMillis();\n"
+                            + "     Date date = new Date(" + name + ");\n"
+                            + "     String time = date.toString();\n";
+                    if (j < methodCount - 1) {
+                        content += "     " + methodNamenext + "();\n";
+                    }
+                    content += "}";
+                    break;
             }
             methodName = methodNamenext;
-
         }
         content = content + "}"; //类末尾
 
@@ -226,20 +479,22 @@ public class RubbishCode {
     //生成名字
     static String generateName() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
+        // 生成15-25位的随机字符串
+        int length = random.nextInt(11) + 15;
+        // 只使用小写字母
+        for (int i = 0; i < length; i++) {
             sb.append(abc[random.nextInt(abc.length)]);
         }
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
     static String generateBigValue() {
-        char[] abc1 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKMNLOPQRSTUVWZYZ0123456789".toCharArray();
+        char[] allChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < random.nextInt(1000); i++) {
-            sb.append(abc1[random.nextInt(abc1.length)]);
+        int length = random.nextInt(191) + 10; // 生成10-200长度的字符串
+        for (int i = 0; i < length; i++) {
+            sb.append(allChars[random.nextInt(allChars.length)]);
         }
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
