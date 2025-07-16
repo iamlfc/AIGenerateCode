@@ -6,14 +6,9 @@
 
 1. 集成过程操作简单，新手也能操作
 2. 生成代码不但能够编译进aab和apk，还会被调用，即使开了minifyEnabled true和shrinkResources true
-3. 针对纯java和xml布局分别有两套方案
-4. RubbishCode： 垃圾代码生成，包含drawable,layout,string,manifests,java
-5. RubbishCodeDoctor： 垃圾代码生成不用xml,比如layout,，全部用java代码实现
-6. ProguardGenerateClass： 混淆文件生成，增加反编译难度
-7. SecretCode：字符串加密
-8. LU：国际化多国语言，不是系统方案
-9. build.gradle包含批量修改文件名
-10. 微信：Doctor_Gero
+3. RubbishCode： 垃圾代码生成，包含drawable,layout,string,manifests,java
+4. ProguardGenerateClass： 混淆文件生成，增加反编译难度
+5. 微信：Doctor_Gero
 
    使用方法：
 *    1 android studio右键RubbishCode，弹出框里选择 Run 'RubbishCode.main()',就生成了一个包含垃圾代码的项目
