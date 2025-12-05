@@ -1,0 +1,31 @@
+// groovy
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.doow.rubbish'
+version = '1.0-SNAPSHOT'
+
+// Gradle 工具链，匹配项目 Java 版本
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// 兼容不同 Gradle 版本：新版本使用 mainClass，旧版本使用 mainClassName
+application {
+    // 对应你的主类全名
+    mainClass = 'com.doow.rubbish.RubbishCode' // Gradle 6.7+ / 7+
+    // mainClassName = 'com.doow.rubbish.RubbishCode' // 如需兼容较旧 Gradle 可启用
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 如果主类只依赖 JDK，保留空。如果需要其他库，可在此添加
+    // implementation 'org.apache.commons:commons-lang3:3.12.0'
+}
